@@ -114,7 +114,7 @@ https://medium.com/@heyoka/responsive-pure-css-off-canvas-hamburger-menu-aebc8d1
 
 /* set the menu in a fixed position occupying 100% of the screen height, so you can't scroll away from it. Have nav scrollbars appear when needed. Any long nav names should be fully visible. */
 .main-menu {
-    /* position: fixed; */
+    /* position: fixed; >>> See sticky*/
     position: sticky;
     display: none;
     left: -200px;
