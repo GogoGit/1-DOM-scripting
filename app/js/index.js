@@ -12,7 +12,8 @@ makeNav();
 
 const categories = navItemsObject.map((item) => item.link); //creating our own array
 // Note you need to makeNav() before you can manipulate it! LOL (order of operations)
-const navItems = document.querySelectorAll("li[class^='navitem-']"); //This is an attribute selector
+const navItems = document.querySelectorAll('nav li');
+// const navItems = document.querySelectorAll("li[class^='navitem-']"); //This is an attribute selector
 // const navItems = document.querySelectorAll('nav li');  //This is the same as the above code.
 
 // document.addEventListener("click", () =>{})
@@ -55,23 +56,22 @@ function setActiveTab(section) {
 }
 
 function renderStories(section) {
-    setActiveTab(`#${section}`);
-
+    console.log(section);
+    setActiveTab(section);
     let data = JSON.parse(localStorage.getItem(section));
 
     if (data) {
-        data.results.map((story) => {
-            var storyEl = document.createElement('div');
+        data.results.forEach((story) => {
+            let storyEl = document.createElement('div');
             storyEl.className = 'entry';
             storyEl.innerHTML = `
-        <img src="${story.multimedia ? story.multimedia[0].url : ''}" alt="${
-                story.title
-            }" />
-        <div>
-          <h3><a target="_blank" href="${story.url}">${story.title}</a></h3>
-          <p>${story.abstract}</p>
-        </div>
-        `;
+            <img src="${story.multimedia ? story.multimedia[0].url : ''}" 
+            alt="${story.title}" />
+            <div>
+              <h3><a target="_blank" href="${story.url}">${story.title}</a></h3>
+              <p>${story.abstract}</p>
+            </div>
+            `;
             root.prepend(storyEl);
         });
     } else {
