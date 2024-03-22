@@ -61,6 +61,15 @@ header {
     justify-content: center;
 }
 
+nav a {
+    opacity: 0.9;
+}
+
+nav .active {
+    font-weight: bold;
+    opacity: 1;
+}
+
 h1 {
     font-family: 'Lobster', cursive;
     font-weight: normal;

@@ -1,50 +1,80 @@
 import { makeNav } from './modules/nav.js';
-// some people use .mjs (modular) vs .js
+import navItemsObject from './modules/navitems.js';
 
 const root = document.querySelector('.site-wrap');
-// const nytapi = "KgGi6DjX1FRV8AlFewvDqQ8IYFGzAcHM"; // note this should be your API key
-const nytapi = 'oPLG8YzOchvb5TKZ1nBt4wGD4EpD2NcB'; // note this should be your API key
-const nytUrl = `https://api.nytimes.com/svc/topstories/v2/travel.json?api-key=${nytapi}`;
+// const nytapi = "KgGi6DjX1FRV8AlFewvDqQ8IYFGzAcHM"; // note Instructor API key
+// const nytapi = 'oPLG8YzOchvb5TKZ1nBt4wGD4EpD2NcB'; // note this should be your API key
+const nytapi = '87INHgSZyqypdcXwAnjLDiWSVT0mW7vA'; // note this should be your API key
 
-// fetch(nytUrl)
-//     .then(function (response) {
-//         return response.json(); //Look it's a promise (returns response )
-//     })
-//     .then(function (myJson) {
-//         console.log(myJson);
-//         console.dir(myJson);    //Look it's another promise
-//     });
+// const nytUrl = `https://api.nytimes.com/svc/topstories/v2/travel.json?api-key=${nytapi}`;
 
-//Refactor using arrow functions
-fetch(nytUrl)
-    .then((response) => response.json())
-    .then((myJson) => localStorage.setItem('stories', JSON.stringify(myJson)))
-    .then(renderStories);
+makeNav();
 
-// function renderStories() {
-//     let data = JSON.parse(localStorage.getItem('stories'));
-//     // using forEach method as it does not return anything!!!
-//     data.results.forEach((story) => {
-//         console.log(story);
-//     });
-// }
+const categories = navItemsObject.map((item) => item.link); //creating our own array
+// Note you need to makeNav() before you can manipulate it! LOL (order of operations)
+const navItems = document.querySelectorAll("li[class^='navitem-']"); //This is an attribute selector
+// const navItems = document.querySelectorAll('nav li');  //This is the same as the above code.
 
-function renderStories() {
-    let data = JSON.parse(localStorage.getItem('stories'));
-    data.results.forEach((story) => {
-        let storyEl = document.createElement('div');
-        storyEl.className = 'entry';
-        storyEl.innerHTML = `
+// document.addEventListener("click", () =>{})
+for (let i = 0; i < navItems.length; i++) {
+    navItems[i].addEventListener('click', () => {
+        fetchArticles(categories[i]);
+    });
+}
+
+function fetchArticles(section) {
+    section = section.substring(1);
+    if (!localStorage.getItem(section)) {
+        console.log('section not in local storage, fetching');
+        fetch(
+            `https://api.nytimes.com/svc/topstories/v2/${section}.json?api-key=${nytapi}`,
+        )
+            .then((response) => response.json())
+            .then((data) => setLocalStorage(section, data))
+            .catch((error) => {
+                console.warn(error);
+            });
+    } else {
+        console.log('section in local storage');
+        renderStories(section);
+    }
+}
+
+function setLocalStorage(section, myJson) {
+    localStorage.setItem(section, JSON.stringify(myJson));
+    renderStories(section);
+}
+
+function setActiveTab(section) {
+    const activeTab = document.querySelector('a.active');
+    if (activeTab) {
+        activeTab.classList.remove('active');
+    }
+    const tab = document.querySelector(`nav li a[href="#${section}"]`);
+    tab.classList.add('active');
+}
+
+function renderStories(section) {
+    setActiveTab(`#${section}`);
+
+    let data = JSON.parse(localStorage.getItem(section));
+
+    if (data) {
+        data.results.map((story) => {
+            var storyEl = document.createElement('div');
+            storyEl.className = 'entry';
+            storyEl.innerHTML = `
         <img src="${story.multimedia ? story.multimedia[0].url : ''}" alt="${
-            story.title
-        }" />
+                story.title
+            }" />
         <div>
           <h3><a target="_blank" href="${story.url}">${story.title}</a></h3>
           <p>${story.abstract}</p>
         </div>
         `;
-        root.prepend(storyEl);
-    });
+            root.prepend(storyEl);
+        });
+    } else {
+        console.log('data not ready yet');
+    }
 }
-
-makeNav();
