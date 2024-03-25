@@ -1,14 +1,17 @@
+//imports
 import { makeNav } from './modules/nav.js';
 import navItemsObject from './modules/navitems.js';
 
+//variables
+let bolDebug = false;
+//const lstSort = document.getElementById('sort-Data');    //Not sure why this doesn't work?
+const btn = document.getElementsByClassName('btn-Modify');
 const root = document.querySelector('.site-wrap');
 // const nytapi = "KgGi6DjX1FRV8AlFewvDqQ8IYFGzAcHM"; // note Instructor API key
 // const nytapi = 'oPLG8YzOchvb5TKZ1nBt4wGD4EpD2NcB'; // note this should be your API key
 const nytapi = '87INHgSZyqypdcXwAnjLDiWSVT0mW7vA'; // note this should be your API key
 
 // const nytUrl = `https://api.nytimes.com/svc/topstories/v2/travel.json?api-key=${nytapi}`;
-
-const lstSort = document.getElementById('sort-Data');
 
 // Not sure why this doen't work ?
 // const chkFilter = document.getElementById('filter');
@@ -22,6 +25,8 @@ const navItems = document.querySelectorAll('nav li');
 // const navItems = document.querySelectorAll('nav li');  //This is the same as the above code.
 
 // document.addEventListener("click", () =>{})
+
+// functions
 for (let i = 0; i < navItems.length; i++) {
     navItems[i].addEventListener('click', () => {
         fetchArticles(categories[i]);
@@ -31,7 +36,11 @@ for (let i = 0; i < navItems.length; i++) {
 function fetchArticles(section) {
     section = section.substring(1);
     if (!localStorage.getItem(section)) {
-        console.log('section not in local storage, fetching');
+        if (bolDebug) {
+            console.log(
+                `funciton fetchArticles - section not in local storage, fetching`,
+            );
+        }
         fetch(
             `https://api.nytimes.com/svc/topstories/v2/${section}.json?api-key=${nytapi}`,
         )
@@ -41,7 +50,11 @@ function fetchArticles(section) {
                 console.warn(error);
             });
     } else {
-        console.log('section in local storage');
+        if (bolDebug) {
+            console.log(
+                `funciton fetchArticles - section in local storage, render`,
+            );
+        }
         renderStories(section);
     }
 }
@@ -61,9 +74,13 @@ function setActiveTab(section) {
 }
 
 function renderStories(section) {
-    console.log(section);
+    if (bolDebug) {
+        console.log(`funciton renderStories - Process ${section}`);
+    }
     setActiveTab(section);
     let data = JSON.parse(localStorage.getItem(section));
+    removeEntries();
+    data = UpdateData(section, data);
 
     if (data) {
         processStories(data);
@@ -73,7 +90,11 @@ function renderStories(section) {
 }
 
 function processStories(data) {
-    console.log(`Process Stories Count: ${data.results.length}`);
+    if (bolDebug) {
+        console.log(
+            `funciton processStories - Process Stories Count: ${data.results.length}`,
+        );
+    }
     data.results.forEach((story) => {
         let storyEl = document.createElement('div');
         storyEl.className = 'entry';
@@ -86,144 +107,133 @@ function processStories(data) {
         </div>
         `;
         root.append(storyEl);
-        // root.prepend(storyEl);
+        //root.prepend(storyEl);
     });
 }
 
 function removeEntries() {
     let entries = document.getElementsByClassName('entry');
-    // for (let i = 0; i < entries.length; i++) {
+
+    if (bolDebug) {
+        console.log(`function removeEntries - Before count: ${entries.length}`);
+    }
+
     for (let i = entries.length - 1; i > -1; i--) {
         entries[i].remove();
-        console.log(i);
+    }
+
+    if (bolDebug) {
+        console.log(`function removeEntries - After count: ${entries.length}`);
     }
 }
 
-// entry
+function UpdateData(section, dataJSON) {
+    /* 
+Notes
+    Filter out by section:
+        var myDataFilter = myResults.filter((item) => item.section === "arts")
+        document.getElementById("filter").checked
 
-// const btn = document.getElementsByClassName("btn-Modify");
-// btn.addEventListener("click", btnDo);
+        
+    Sort by:  byline, title, published_date or created_date
+    https://www.freecodecamp.org/news/how-to-sort-array-of-objects-by-property-name-in-javascript/
+        Array.sort((a, b) => a.age - b.age)
+        Sort Strings
+            mySortedData = myResults.sort((a, b) => String(a.byline).localeCompare(String(b.byline)))
+        
+        I Think this works by Date
+            mySortedData = myResults.sort((a, b) => a.created_date - b.created_date)
 
-document.addEventListener('click', btnDo);
+        document.getElementById("sort-Data").value    
+*/
 
-function modifyData(mySection, data) {}
+    let results = dataJSON.results;
 
-function btnDo(event) {
-    // console.dir(event.target);
-    // console.dir(event);
+    if (bolDebug) {
+        console.log(`function UpdataData - Before updates:  ${results.length}`);
+    }
 
-    if (event.target.className === 'btn-Modify') {
-        // console.dir('My button was clicked');
-
-        try {
-            var section = document.querySelector('a.active').text.toLowerCase();
-
-            var sectionData = JSON.parse(localStorage.getItem(section));
-
-            // Sort
-            if (lstSort.value != 'None') {
-                sectionData = SectionSort(
-                    document.getElementById('sort-Data').value,
-                    sectionData,
-                );
+    // check if we Filter Data
+    if (document.getElementById('filter').checked === true) {
+        //Know your data??? Filter on Food = 0, looking at the data I think we can filter by 'dining'
+        if (section === 'food') {
+            if (bolDebug) {
+                console.log(`function UpdataData - filter 'food' by 'dining'`);
             }
-
-            // Filter
-            if (document.getElementById('filter').checked === true) {
-                sectionData = sectionFilter(section, sectionData);
-            }
-
-            removeEntries();
-            processStories(sectionData);
-        } catch (error) {
-            console.log('No Section selected');
+            results = results.filter((item) => item.section === 'dining');
+        } else {
+            results = results.filter((item) => item.section === section);
         }
 
-        event.preventDefault();
+        if (bolDebug) {
+            console.log(
+                `function UpdataData (Filter Data) - After updates:  ${results.length}`,
+            );
+        }
+    }
+
+    // check if we sort Data
+    let lstSort = document.getElementById('sort-Data');
+    if (lstSort.value != 'none') {
+        switch (lstSort.value) {
+            case 'byline':
+                results = results.sort((a, b) =>
+                    String(a.byline).localeCompare(String(b.byline)),
+                );
+                break;
+            case 'title':
+                results = results.sort((a, b) =>
+                    String(a.title).localeCompare(String(b.title)),
+                );
+                break;
+            case 'published_date':
+                results = results.sort(
+                    (a, b) => a.published_date - b.published_date,
+                );
+                break;
+            case 'created_date':
+                results = results.sort(
+                    (a, b) => a.created_date - b.created_date,
+                );
+                break;
+            default:
+                console.log(`Unhandled sort type: '${mySort}'`);
+        }
+
+        if (bolDebug) {
+            console.log(
+                `function UpdataData (Sort Data) - After updates:  ${results.length}`,
+            );
+        }
+    }
+
+    dataJSON.results = results;
+    return dataJSON;
+}
+
+function btnModify(event) {
+    if (bolDebug) {
+        console.log(`function btnModify - Event Clicked:  ${event.value}`);
+    }
+    if (event.target.className === 'btn-Modify') {
+        try {
+            //Is anything selected?
+            // event.preventDefault();
+            let section = document.querySelector('a.active').text.toLowerCase();
+
+            if (bolDebug) {
+                console.log(`function btnModify - Modify Data!`);
+            }
+            renderStories(section);
+        } catch {
+            if (bolDebug) {
+                console.log(
+                    `function btnModify - Nothing Selected to display.`,
+                );
+            }
+        }
     }
 }
 
-function sectionFilter(mySection, data) {
-    let myDataFiltered = data.results.filter(
-        (item) => item.section === mySection,
-    );
-    console.table(myDataFiltered);
-    data.results = myDataFiltered;
-    return data;
-}
-
-function SectionSort(mySort, data) {
-    let results = data.results;
-    var mySortedData;
-
-    switch (mySort) {
-        case 'byline':
-            mySortedData = results.sort((a, b) =>
-                String(a.byline).localeCompare(String(b.byline)),
-            );
-            break;
-        case 'title':
-            mySortedData = results.sort((a, b) =>
-                String(a.title).localeCompare(String(b.title)),
-            );
-            break;
-        case 'published_date':
-            mySortedData = results.sort(
-                (a, b) => a.published_date - b.published_date,
-            );
-            break;
-        case 'created_date':
-            mySortedData = results.sort(
-                (a, b) => a.created_date - b.created_date,
-            );
-            break;
-        default:
-            mySortedData = data.results;
-            console.log(`Unhandled sort type: '${mySort}'`);
-    }
-
-    console.table(mySortedData);
-    data.results = mySortedData;
-    return data;
-}
-
-function checkData(section, data) {
-    console.log(`Section: ${section}`);
-    let tmp;
-
-    for (let i = 0; i < data.length; i++) {
-        tmp = data[i][section];
-
-        console.log(`\t${data[i].title}>>>>  ${tmp}`);
-    }
-}
-
-// for(let i=0; i < data.length; i++){
-//     console.log(`\t${data[i].title}, ${data[i].[section]}`);
-// }
-
-// for(let i=0; i < data.length; i++){
-//     console.log(`\t${data[i].title}, ${data[i].[section]} `);
-// }
-
-/*
-Filter out by section:
-    var myDataFilter = JSON.parse( Data from fetch or from local storage  )
-    var myDataFilter = myResults.filter((item) => item.section === "arts")
-
-    document.getElementById("filter").checked
-
-
-
-Sort by:  byline, title, published_date or created_date
-https://www.freecodecamp.org/news/how-to-sort-array-of-objects-by-property-name-in-javascript/
-    Array.sort((a, b) => a.age - b.age)
-    Sort Strings
-        mySortedData = myResults.sort((a, b) => String(a.byline).localeCompare(String(b.byline)))
-    
-    I Think this works by Date
-        mySortedData = myResults.sort((a, b) => a.created_date - b.created_date)
-
-    document.getElementById("sort-Data").value
-    
-*/
+//Listeners
+document.addEventListener('click', btnModify);
