@@ -4,19 +4,18 @@ import navItemsObject from './modules/navitems.js';
 
 //variables
 let bolDebug = false;
-//const lstSort = document.getElementById('sort-Data');    //Not sure why this doesn't work?
-const btn = document.getElementsByClassName('btn-Modify');
-const root = document.querySelector('.site-wrap');
-// const nytapi = "KgGi6DjX1FRV8AlFewvDqQ8IYFGzAcHM"; // note Instructor API key
-// const nytapi = 'oPLG8YzOchvb5TKZ1nBt4wGD4EpD2NcB'; // note this should be your API key
-const nytapi = '87INHgSZyqypdcXwAnjLDiWSVT0mW7vA'; // note this should be your API key
+//Need to figure out how to use Environmental Varibles from netlify
+// Local: .env, Web: Stored in Netlify Environment Variable
+const nytapi = '87INHgSZyqypdcXwAnjLDiWSVT0mW7vA';
 
 // const nytUrl = `https://api.nytimes.com/svc/topstories/v2/travel.json?api-key=${nytapi}`;
 
-// Not sure why this doen't work ?
-// const chkFilter = document.getElementById('filter');
-
 makeNav();
+
+const btn = document.getElementsByClassName('btn-Modify');
+const root = document.querySelector('.site-wrap');
+// const lstSort = document.getElementById('sort-Data'); //Not sure why this doesn't work?
+// const chkFilter = document.getElementById('filter'); // Not sure why this doen't work ?
 
 const categories = navItemsObject.map((item) => item.link); //creating our own array
 // Note you need to makeNav() before you can manipulate it! LOL (order of operations)
