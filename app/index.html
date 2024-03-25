@@ -43,6 +43,7 @@
                 <span class="sr-only">Close main menu</span>
                 <span class="fa fa-close" aria-hidden="true"></span>
             </a>
+
             <!-- adding this to fix our new issue with EXERCISE III - Using Array.prototype.map() see index.js -->
             <span id="main-nav"></span>
             <ul>
@@ -54,6 +55,25 @@
             </ul>
         </nav>
         <a href="#main-menu-toggle" class="backdrop" tabindex="-1" hidden></a>
+
+        <!-- Add controls to SORT and FILTER the data -->
+        <div class="modify-Data">
+            <label for="sort-Data">Sort Data By: </label>
+            <select for="sort-Data" id="sort-Data">
+                <option selected value="none"></option>
+                <option value="byline">By Line</option>
+                <option value="created_date">Created Date</option>
+                <option value="published_date">Published Date</option>
+                <option value="title">Title</option>
+            </select>
+
+            <input type="checkbox" name="filter" id="filter" />
+            <label for="filter">Filter?</label>
+
+            <button class="btn-Modify" type="button" name="modify">
+                Modify
+            </button>
+        </div>
 
         <main class="site-wrap">
             <h2>Welcome!</h2>
